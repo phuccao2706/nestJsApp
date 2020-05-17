@@ -4,10 +4,15 @@ import {
   CreateDateColumn,
   Column,
   BeforeInsert,
+  OneToMany,
+  UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { UserRO } from './user.dto';
+import { IdeaEntity } from 'src/idea/idea.entity';
 
 @Entity('user')
 export class UserEntity {
@@ -16,6 +21,9 @@ export class UserEntity {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  lastUpdateAt: Date;
 
   @Column({
     type: 'text',
@@ -26,6 +34,16 @@ export class UserEntity {
   @Column()
   password: string;
 
+  @OneToMany(
+    type => IdeaEntity,
+    idea => idea.createdBy,
+  )
+  ideas: IdeaEntity[];
+
+  @ManyToMany(type => IdeaEntity, { cascade: true })
+  @JoinTable()
+  bookmarks: IdeaEntity[];
+
   @BeforeInsert()
   async hasPassword() {
     this.password = await bcrypt.hash(this.password, 9);
@@ -34,8 +52,17 @@ export class UserEntity {
   returnResponseObject(showToken: boolean = true): UserRO {
     const { _id, createdAt, username, token } = this;
     const responseObject: any = { _id, createdAt, username };
+
     if (showToken) {
       responseObject.token = token;
+    }
+
+    if (this.ideas) {
+      responseObject.ideas = this.ideas;
+    }
+
+    if (this.bookmarks) {
+      responseObject.bookmarks = this.bookmarks;
     }
 
     return responseObject;

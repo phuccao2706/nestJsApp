@@ -13,7 +13,9 @@ export class HttpErrorFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const req = ctx.getRequest();
     const res = ctx.getResponse();
-    const status = exception.getStatus();
+    const status = exception.getStatus
+      ? exception.getStatus()
+      : HttpStatus.INTERNAL_SERVER_ERROR;
     const userResponse = {
       code: status,
       timestamp: new Date().toLocaleDateString(),
@@ -25,10 +27,8 @@ export class HttpErrorFilter implements ExceptionFilter {
     Logger.error(
       `${req.method} ${req.url}`,
       JSON.stringify(userResponse),
-      'ExceptionFilter ',
+      'Exception Filter',
     );
-
-    console.log('userResponse', userResponse);
 
     res.status(status).json(userResponse);
   }

@@ -1,4 +1,8 @@
 import { IsString } from 'class-validator';
+import { UserRO } from 'src/user/user.dto';
+import { UserEntity } from 'src/user/user.entity';
+import { CommentEntity } from 'src/comment/comment.entity';
+import { CommentRO } from 'src/comment/comment.dto';
 
 export class IdeaDTO {
   @IsString()
@@ -6,4 +10,16 @@ export class IdeaDTO {
 
   @IsString()
   description: string;
+}
+
+export class IdeaRO {
+  _id?: string;
+  createdAt: Date;
+  lastUpdateAt?: Date;
+  idea: string;
+  description: string;
+  createdBy: UserRO;
+  upvotes?: UserRO[];
+  downvotes?: UserRO[];
+  comments?: CommentRO[];
 }

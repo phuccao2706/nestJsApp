@@ -19,9 +19,7 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Get('api/users')
-  @UseGuards(new AuthGuard())
-  getUsers(@User() user) {
-    console.log('user', user);
+  getUsers() {
     return this.userService.getUsers();
   }
 

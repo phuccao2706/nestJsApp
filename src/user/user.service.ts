@@ -12,7 +12,9 @@ export class UserService {
   ) {}
 
   async getUsers(): Promise<UserRO[]> {
-    const users = await this.userRepository.find();
+    const users = await this.userRepository.find({
+      relations: ['ideas', 'bookmarks'],
+    });
     return users.map(user => user.returnResponseObject(false));
   }
 

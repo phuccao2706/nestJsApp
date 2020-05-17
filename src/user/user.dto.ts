@@ -1,4 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
+import { UserEntity } from './user.entity';
 
 export class UserDTO {
   @IsNotEmpty()
@@ -13,4 +14,5 @@ export class UserRO {
   username: string;
   createdAt: string;
   token?: string;
+  bookmarks?: UserEntity[];
 }
