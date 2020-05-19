@@ -6,7 +6,7 @@ import { Logger } from '@nestjs/common';
 const port = process.env.PORT || 8080;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
   await app.listen(port);
   Logger.log(`Currently running on http://localhost:${port}`, 'Bootstrap');
 }

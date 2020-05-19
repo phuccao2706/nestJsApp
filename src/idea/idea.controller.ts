@@ -9,6 +9,7 @@ import {
   UsePipes,
   UseGuards,
   Logger,
+  Query,
 } from '@nestjs/common';
 import { IdeaService } from './idea.service';
 import { IdeaDTO } from './idea.dto';
@@ -29,8 +30,8 @@ export class IdeaController {
   }
 
   @Get()
-  getIdeas() {
-    return this.ideaService.getIdeas();
+  getIdeas(@Query('page') page: number) {
+    return this.ideaService.getIdeas(page);
   }
 
   @Post()
@@ -88,7 +89,6 @@ export class IdeaController {
     @User('username') username: string,
   ) {
     this.logData({ _id, userId });
-    console.log('username', username);
     return this.ideaService.upvoteIdea(_id, userId);
   }
 

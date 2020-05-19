@@ -17,7 +17,6 @@ export class IdeaService {
   ) {}
 
   private formatRO = (idea: IdeaEntity): IdeaRO => {
-    console.log(idea);
     return {
       ...idea,
       createdBy: idea.createdBy
@@ -82,7 +81,7 @@ export class IdeaService {
   }
 
   //INFO: get all ideas
-  async getIdeas(): Promise<IdeaRO[]> {
+  async getIdeas(page: number = 1): Promise<IdeaRO[]> {
     const ideas = await this.ideaRepository.find({
       relations: [
         'createdBy',
@@ -92,6 +91,8 @@ export class IdeaService {
         'comments.createdBy',
         'comments.idea',
       ],
+      take: 10,
+      skip: 10 * (page - 1),
     });
 
     return ideas.map(idea => this.formatRO(idea));
