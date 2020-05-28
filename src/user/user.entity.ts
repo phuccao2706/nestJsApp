@@ -34,6 +34,24 @@ export class UserEntity {
   @Column()
   password: string;
 
+  @Column()
+  firstname: string;
+
+  @Column()
+  lastname: string;
+
+  @Column({
+    type: 'text',
+    unique: true,
+  })
+  phoneNumber: string;
+
+  @Column({
+    type: 'text',
+    unique: true,
+  })
+  email: string;
+
   @OneToMany(
     type => IdeaEntity,
     idea => idea.createdBy,
@@ -50,8 +68,25 @@ export class UserEntity {
   }
 
   returnResponseObject(showToken: boolean = true): UserRO {
-    const { _id, createdAt, username, token } = this;
-    const responseObject: any = { _id, createdAt, username };
+    const {
+      _id,
+      createdAt,
+      username,
+      token,
+      firstname,
+      lastname,
+      phoneNumber,
+      email,
+    } = this;
+    const responseObject: any = {
+      _id,
+      createdAt,
+      username,
+      firstname,
+      lastname,
+      phoneNumber,
+      email,
+    };
 
     if (showToken) {
       responseObject.token = token;

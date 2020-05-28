@@ -12,8 +12,8 @@ import * as jwt from 'jsonwebtoken';
 export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    if (!request.headers.authorization) return false;
 
+    if (!request.headers.authorization) return false;
     const temp = await this.validateToken(request.headers.authorization);
     request.user = temp;
 

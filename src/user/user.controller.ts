@@ -9,7 +9,7 @@ import {
   Param,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserDTO } from './user.dto';
+import { UserDTO, UserInputDTO, UserRO } from './user.dto';
 import { ValidationPipe } from 'src/shared/validation.pipe';
 import { AuthGuard } from 'src/shared/auth.guard';
 import { User } from './user.decorator';
@@ -23,6 +23,12 @@ export class UserController {
     return this.userService.getUsers();
   }
 
+  @Get('api/currentUser')
+  @UseGuards(new AuthGuard())
+  getCurrentUser(@User('_id') userId: string) {
+    return this.userService.getCurrentUser(userId);
+  }
+
   @Post('register')
   @UsePipes(new ValidationPipe())
   register(@Body() data: UserDTO) {
@@ -31,11 +37,12 @@ export class UserController {
 
   @Post('login')
   @UsePipes(new ValidationPipe())
-  login(@Body() data: UserDTO) {
+  login(@Body() data: UserInputDTO) {
     return this.userService.login(data);
   }
 
   @Delete('api/users/:_id')
+  @UseGuards(new AuthGuard())
   destroyUser(@Param('_id') _id: string) {
     return this.userService.destroyUser(_id);
   }

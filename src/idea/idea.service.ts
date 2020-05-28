@@ -34,6 +34,7 @@ export class IdeaService {
             createdBy: item.createdBy.returnResponseObject(false),
           }))
         : [],
+      hashtags: idea.hashtags.split('-'),
     };
   };
 
@@ -77,6 +78,10 @@ export class IdeaService {
       );
     }
 
+    idea.comments = idea.comments
+      .slice()
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
     return this.formatRO(idea);
   }
 
@@ -93,9 +98,18 @@ export class IdeaService {
       ],
       take: 10,
       skip: 10 * (page - 1),
+      order: {
+        createdAt: 'DESC',
+      },
     });
 
     return ideas.map(idea => this.formatRO(idea));
+  }
+
+  //INFO: get amount of ideas
+  async getAmoutOfIdeas(): Promise<Number> {
+    const ideas = await this.ideaRepository.count({});
+    return ideas;
   }
 
   //INFO: create an idea
@@ -116,8 +130,19 @@ export class IdeaService {
   async getIdea(_id: string): Promise<IdeaRO> {
     const idea = await this.ideaRepository.findOne({
       where: { _id },
-      relations: ['createdBy'],
+      relations: [
+        'createdBy',
+        'upvotes',
+        'downvotes',
+        'comments',
+        'comments.createdBy',
+        'comments.idea',
+      ],
     });
+
+    idea.comments = idea.comments
+      .slice()
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
     if (!idea) {
       throw new HttpException(
@@ -194,18 +219,29 @@ export class IdeaService {
     });
 
     if (user.bookmarks.find(idea => idea._id === _id)) {
-      throw new HttpException('Duplicate idea', HttpStatus.BAD_REQUEST);
+      user.bookmarks = user.bookmarks.filter(item => item._id !== _id);
+    } else {
+      user.bookmarks.push(idea);
     }
 
-    user.bookmarks.push(idea);
     await this.userRepository.save(user);
 
-    return user.returnResponseObject(false);
+    return user.returnResponseObject();
   }
 
   //INFO: remove bookmark idea
   async unbookmarkIdea(_id: string, userId: string) {
-    const idea = await this.ideaRepository.findOne({ where: { _id } });
+    const idea = await this.ideaRepository.findOne({
+      where: { _id },
+      relations: [
+        'createdBy',
+        'upvotes',
+        'downvotes',
+        'comments',
+        'comments.createdBy',
+        'comments.idea',
+      ],
+    });
     const user = await this.userRepository.findOne({
       where: { _id: userId },
       relations: ['bookmarks'],

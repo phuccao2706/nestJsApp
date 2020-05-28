@@ -9,10 +9,20 @@ import { HttpErrorFilter } from './shared/http-error.filter';
 import { LoggingInterceptor } from './shared/logging.interceptor';
 import { UserModule } from './user/user.module';
 import { CommentModule } from './comment/comment.module';
+import { UploadController } from './upload/upload.controller';
+import { MulterModule } from '@nestjs/platform-express';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(), IdeaModule, UserModule, CommentModule],
-  controllers: [AppController],
+  imports: [
+    TypeOrmModule.forRoot(),
+    IdeaModule,
+    UserModule,
+    CommentModule,
+
+    UploadModule,
+  ],
+  controllers: [AppController, UploadController],
   providers: [
     AppService,
     {

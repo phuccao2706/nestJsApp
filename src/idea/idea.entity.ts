@@ -21,6 +21,8 @@ export class IdeaEntity {
 
   @Column('text') description: string;
 
+  @Column('text') hashtags: string;
+
   @ManyToOne(
     type => UserEntity,
     createdBy => createdBy.ideas,

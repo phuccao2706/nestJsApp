@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { UserEntity } from 'src/user/user.entity';
 import { CommentEntity } from './comment.entity';
 import { CommentDTO } from './comment.dto';
+import { IdeaRO } from 'src/idea/idea.dto';
 
 @Injectable()
 export class CommentService {
@@ -16,6 +17,29 @@ export class CommentService {
     @InjectRepository(CommentEntity)
     private commentRepository: Repository<CommentEntity>,
   ) {}
+
+  private formatRO = (idea: IdeaEntity): IdeaRO => {
+    return {
+      ...idea,
+      createdBy: idea.createdBy
+        ? idea.createdBy.returnResponseObject(false)
+        : null,
+      upvotes: idea.upvotes
+        ? idea.upvotes.map(item => item.returnResponseObject(false))
+        : [],
+      downvotes: idea.downvotes
+        ? idea.downvotes.map(item => item.returnResponseObject(false))
+        : [],
+      comments: idea.comments
+        ? idea.comments.map(item => ({
+            ...item,
+            createdBy: item.createdBy.returnResponseObject(false),
+          }))
+        : [],
+      hashtags: idea.hashtags.split('-'),
+    };
+  };
+
   private formatCommentRO = (comments: CommentEntity[]) =>
     comments.map(item => ({
       ...item,
@@ -41,7 +65,17 @@ export class CommentService {
   }
 
   async comment(ideaId: string, userId: string, data: CommentDTO) {
-    const idea = await this.ideaRepository.findOne({ where: { _id: ideaId } });
+    const idea = await this.ideaRepository.findOne({
+      where: { _id: ideaId },
+      relations: [
+        'upvotes',
+        'downvotes',
+        'createdBy',
+        'comments',
+        'comments.createdBy',
+      ],
+    });
+
     const user = await this.userRepository.findOne({ where: { _id: userId } });
 
     const comment = this.commentRepository.create({
@@ -50,10 +84,21 @@ export class CommentService {
       createdBy: user,
     });
 
-    const temp = await this.commentRepository.find();
     await this.commentRepository.save(comment);
 
-    return comment;
+    // const comments = await this.commentRepository.find({
+    //   where: { idea: { _id: ideaId } },
+    //   relations: ['createdBy', 'idea'],
+    // });
+
+    idea.comments = [
+      comment,
+      ...idea.comments
+        .slice()
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
+    ];
+
+    return this.formatRO(idea);
   }
 
   async getComment(commentId: string) {

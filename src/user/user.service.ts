@@ -2,7 +2,7 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './user.entity';
 import { Repository } from 'typeorm';
-import { UserDTO, UserRO } from './user.dto';
+import { UserDTO, UserRO, UserInputDTO } from './user.dto';
 
 @Injectable()
 export class UserService {
@@ -18,20 +18,46 @@ export class UserService {
     return users.map(user => user.returnResponseObject(false));
   }
 
-  async register({ username, password }: UserDTO): Promise<UserRO> {
-    let user = await this.userRepository.findOne({ where: { username } });
+  async getCurrentUser(userId: string): Promise<UserRO> {
+    const user = await this.userRepository.findOne({
+      where: { _id: userId },
+      relations: ['ideas', 'bookmarks'],
+    });
+    return user.returnResponseObject(false);
+  }
+
+  async register(data: UserDTO): Promise<UserRO> {
+    let user = await this.userRepository.findOne({
+      where: [
+        { username: data.username },
+        { email: data.email },
+        { phoneNumber: data.phoneNumber },
+      ],
+    });
 
     if (user) {
-      throw new HttpException('Already exist username', HttpStatus.BAD_REQUEST);
+      if (user.username === data.username) {
+        throw new HttpException(
+          'Already exist username',
+          HttpStatus.BAD_REQUEST,
+        );
+      } else if (user.email === data.email) {
+        throw new HttpException('Already exist email', HttpStatus.BAD_REQUEST);
+      } else if (user.phoneNumber === data.phoneNumber) {
+        throw new HttpException(
+          'Already exist phone number',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
 
-    user = this.userRepository.create({ username, password });
+    user = this.userRepository.create(data);
     await this.userRepository.save(user);
 
     return user.returnResponseObject();
   }
 
-  async login({ username, password }: UserDTO): Promise<UserRO> {
+  async login({ username, password }: UserInputDTO): Promise<UserRO> {
     const user = await this.userRepository.findOne({ where: { username } });
 
     if (!user || !(await user.comparePassword(password))) {

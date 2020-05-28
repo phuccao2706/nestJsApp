@@ -34,6 +34,11 @@ export class IdeaController {
     return this.ideaService.getIdeas(page);
   }
 
+  @Get('/amount')
+  getAmoutOfIdeas() {
+    return this.ideaService.getAmoutOfIdeas();
+  }
+
   @Post()
   @UseGuards(new AuthGuard())
   @UsePipes(new ValidationPipe())

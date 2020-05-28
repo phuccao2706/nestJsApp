@@ -10,6 +10,9 @@ export class IdeaDTO {
 
   @IsString()
   description: string;
+
+  @IsString()
+  hashtags: string;
 }
 
 export class IdeaRO {
@@ -18,6 +21,7 @@ export class IdeaRO {
   lastUpdateAt?: Date;
   idea: string;
   description: string;
+  hashtags: string[];
   createdBy: UserRO;
   upvotes?: UserRO[];
   downvotes?: UserRO[];
