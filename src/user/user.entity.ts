@@ -52,6 +52,9 @@ export class UserEntity {
   })
   email: string;
 
+  @Column()
+  avatarUrl: string;
+
   @OneToMany(
     type => IdeaEntity,
     idea => idea.createdBy,
@@ -77,6 +80,7 @@ export class UserEntity {
       lastname,
       phoneNumber,
       email,
+      avatarUrl,
     } = this;
     const responseObject: any = {
       _id,
@@ -86,6 +90,7 @@ export class UserEntity {
       lastname,
       phoneNumber,
       email,
+      avatarUrl,
     };
 
     if (showToken) {

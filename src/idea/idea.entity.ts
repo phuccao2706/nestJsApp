@@ -23,6 +23,8 @@ export class IdeaEntity {
 
   @Column('text') hashtags: string;
 
+  @Column('text') imageUrl: string;
+
   @ManyToOne(
     type => UserEntity,
     createdBy => createdBy.ideas,

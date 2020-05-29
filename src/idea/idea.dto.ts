@@ -12,7 +12,10 @@ export class IdeaDTO {
   description: string;
 
   @IsString()
-  hashtags: string;
+  hashtags?: string;
+
+  @IsString()
+  imageUrl?: string;
 }
 
 export class IdeaRO {

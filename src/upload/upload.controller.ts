@@ -33,7 +33,7 @@ export class UploadController {
       },
     }),
   )
-  uploadFile(@UploadedFile() file) {
-    console.log(file);
+  uploadFile(@UploadedFile() { path }) {
+    return path;
   }
 }

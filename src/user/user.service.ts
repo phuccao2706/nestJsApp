@@ -26,6 +26,37 @@ export class UserService {
     return user.returnResponseObject(false);
   }
 
+  async getUser(username: string): Promise<UserRO> {
+    const user = await this.userRepository.findOne({
+      where: { username },
+      relations: ['ideas', 'bookmarks'],
+    });
+    return user.returnResponseObject(false);
+  }
+
+  async setUserAvatar(
+    username: string,
+    currentUsername: string,
+    imageUrl: string,
+  ): Promise<UserRO> {
+    const user = await this.userRepository.findOne({
+      where: { username },
+      relations: ['ideas', 'bookmarks'],
+    });
+
+    if (user) {
+      if (username === currentUsername) {
+        await this.userRepository.update({ username }, { avatarUrl: imageUrl });
+        user.avatarUrl = imageUrl;
+
+        return user.returnResponseObject(false);
+      }
+      throw new HttpException('Unauthorized action.', HttpStatus.UNAUTHORIZED);
+    }
+
+    throw new HttpException('User not found.', HttpStatus.BAD_REQUEST);
+  }
+
   async register(data: UserDTO): Promise<UserRO> {
     let user = await this.userRepository.findOne({
       where: [

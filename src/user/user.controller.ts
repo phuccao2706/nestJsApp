@@ -7,6 +7,7 @@ import {
   UseGuards,
   Delete,
   Param,
+  Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserDTO, UserInputDTO, UserRO } from './user.dto';
@@ -27,6 +28,22 @@ export class UserController {
   @UseGuards(new AuthGuard())
   getCurrentUser(@User('_id') userId: string) {
     return this.userService.getCurrentUser(userId);
+  }
+
+  @Get('api/user/:username')
+  @UseGuards(new AuthGuard())
+  getUser(@Param('username') username: string) {
+    return this.userService.getUser(username);
+  }
+
+  @Put('api/user/:username/avatar')
+  @UseGuards(new AuthGuard())
+  setUserAvatar(
+    @User('username') currentUsername: string,
+    @Param('username') username: string,
+    @Body() imageUrl: string,
+  ) {
+    return this.userService.setUserAvatar(username, currentUsername, imageUrl);
   }
 
   @Post('register')
