@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 import { UserRO } from 'src/user/user.dto';
 import { UserEntity } from 'src/user/user.entity';
 import { CommentEntity } from 'src/comment/comment.entity';
@@ -11,8 +11,8 @@ export class IdeaDTO {
   @IsString()
   description: string;
 
-  @IsString()
-  hashtags?: string;
+  @IsNotEmpty()
+  hashtags?: string[];
 
   @IsString()
   imageUrl?: string;

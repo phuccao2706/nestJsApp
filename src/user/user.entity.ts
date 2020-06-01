@@ -52,7 +52,7 @@ export class UserEntity {
   })
   email: string;
 
-  @Column()
+  @Column({ default: null })
   avatarUrl: string;
 
   @OneToMany(
@@ -61,7 +61,7 @@ export class UserEntity {
   )
   ideas: IdeaEntity[];
 
-  @ManyToMany(type => IdeaEntity, { cascade: true })
+  @ManyToMany(type => IdeaEntity, { onDelete: 'CASCADE' })
   @JoinTable()
   bookmarks: IdeaEntity[];
 

@@ -11,11 +11,23 @@ export class UserService {
     private userRepository: Repository<UserEntity>,
   ) {}
 
+  private sortIdeas = (user: UserRO): UserRO => {
+    return {
+      ...user,
+      bookmarks: user.bookmarks.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      ),
+      ideas: user.ideas.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      ),
+    };
+  };
+
   async getUsers(): Promise<UserRO[]> {
     const users = await this.userRepository.find({
       relations: ['ideas', 'bookmarks'],
     });
-    return users.map(user => user.returnResponseObject(false));
+    return users.map(user => this.sortIdeas(user.returnResponseObject(false)));
   }
 
   async getCurrentUser(userId: string): Promise<UserRO> {
@@ -23,15 +35,28 @@ export class UserService {
       where: { _id: userId },
       relations: ['ideas', 'bookmarks'],
     });
-    return user.returnResponseObject(false);
+
+    return this.sortIdeas(user.returnResponseObject(false));
   }
 
   async getUser(username: string): Promise<UserRO> {
     const user = await this.userRepository.findOne({
       where: { username },
-      relations: ['ideas', 'bookmarks'],
+      relations: [
+        'ideas',
+        'bookmarks',
+        'ideas.upvotes',
+        'ideas.downvotes',
+        'ideas.comments',
+        'ideas.createdBy',
+        'bookmarks.upvotes',
+        'bookmarks.downvotes',
+        'bookmarks.comments',
+        'bookmarks.createdBy',
+      ],
     });
-    return user.returnResponseObject(false);
+
+    return this.sortIdeas(user.returnResponseObject(false));
   }
 
   async setUserAvatar(

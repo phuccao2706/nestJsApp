@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IdeaDTO, IdeaRO } from './idea.dto';
 import { UserEntity } from 'src/user/user.entity';
 import { Votes } from 'src/shared/vote.enum';
+import { CommentEntity } from 'src/comment/comment.entity';
 
 @Injectable()
 export class IdeaService {
@@ -14,6 +15,8 @@ export class IdeaService {
     private ideaRepository: Repository<IdeaEntity>,
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    @InjectRepository(UserEntity)
+    private commentRepository: Repository<CommentEntity>,
   ) {}
 
   private formatRO = (idea: IdeaEntity): IdeaRO => {
@@ -34,11 +37,11 @@ export class IdeaService {
             createdBy: item.createdBy.returnResponseObject(false),
           }))
         : [],
-      hashtags: idea.hashtags.split('-'),
     };
   };
 
   private isLegitOwner = (ownerId: string, userId: string) => {
+    console.log(ownerId, userId);
     if (ownerId !== userId) {
       throw new HttpException('Unauthorized action.', HttpStatus.UNAUTHORIZED);
     }
@@ -117,6 +120,7 @@ export class IdeaService {
     const createdBy = await this.userRepository.findOne({
       where: { _id: userId },
     });
+
     const idea = this.ideaRepository.create({
       ...data,
       createdBy,
@@ -191,23 +195,28 @@ export class IdeaService {
   }
 
   //INFO: destroy an idea
-  async destroyIdea(_id: string, userId: string) {
-    const idea = await this.ideaRepository.findOne({ where: { _id } });
+  async destroyIdea(ideaId: string, userId: string) {
+    const idea = await this.ideaRepository.findOne({
+      where: { _id: ideaId },
+      relations: ['createdBy'],
+    });
 
-    this.isLegitOwner(idea.createdBy._id, userId);
+    if (idea) {
+      this.isLegitOwner(idea.createdBy._id, userId);
 
-    if (!idea) {
-      throw new HttpException(
-        {
-          status: HttpStatus.NOT_FOUND,
-          error: 'This is a custom message',
-        },
-        HttpStatus.NOT_FOUND,
-      );
+      // await this.commentRepository.delete({ idea: { _id: ideaId } });
+
+      await this.ideaRepository.delete({ _id: ideaId });
+      return { destroyed: true };
     }
 
-    await this.ideaRepository.delete({ _id });
-    return { destroyed: true };
+    throw new HttpException(
+      {
+        status: HttpStatus.NOT_FOUND,
+        error: 'This is a custom message',
+      },
+      HttpStatus.NOT_FOUND,
+    );
   }
 
   //INFO: add bookmark idea

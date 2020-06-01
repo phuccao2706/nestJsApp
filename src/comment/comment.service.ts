@@ -36,7 +36,6 @@ export class CommentService {
             createdBy: item.createdBy.returnResponseObject(false),
           }))
         : [],
-      hashtags: idea.hashtags.split('-'),
     };
   };
 

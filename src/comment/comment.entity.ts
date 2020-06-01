@@ -17,13 +17,14 @@ export class CommentEntity {
 
   @Column('text') comment: string;
 
-  @ManyToOne(type => UserEntity)
+  @ManyToOne(type => UserEntity, { onDelete: 'CASCADE' })
   @JoinTable()
   createdBy: UserEntity;
 
   @ManyToOne(
     type => IdeaEntity,
     idea => idea.comments,
+    { onDelete: 'CASCADE' },
   )
   idea: IdeaEntity;
 }

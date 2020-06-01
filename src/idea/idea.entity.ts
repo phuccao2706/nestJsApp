@@ -21,7 +21,7 @@ export class IdeaEntity {
 
   @Column('text') description: string;
 
-  @Column('text') hashtags: string;
+  @Column('simple-array') hashtags: string[];
 
   @Column('text') imageUrl: string;
 
@@ -31,18 +31,18 @@ export class IdeaEntity {
   )
   createdBy: UserEntity;
 
-  @ManyToMany(type => UserEntity, { cascade: true })
+  @ManyToMany(type => UserEntity, { cascade: true, onDelete: 'CASCADE' })
   @JoinTable()
   upvotes: UserEntity[];
 
-  @ManyToMany(type => UserEntity, { cascade: true })
+  @ManyToMany(type => UserEntity, { cascade: true, onDelete: 'CASCADE' })
   @JoinTable()
   downvotes: UserEntity[];
 
   @OneToMany(
     type => CommentEntity,
     comment => comment.idea,
-    { cascade: true },
+    { onDelete: 'CASCADE' },
   )
   comments: CommentEntity[];
 }
