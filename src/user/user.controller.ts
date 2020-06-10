@@ -78,4 +78,10 @@ export class UserController {
   destroyUser(@Param('_id') _id: string) {
     return this.userService.destroyUser(_id);
   }
+
+  @Get('api/users/follow/:_id')
+  @UseGuards(new AuthGuard())
+  followUser(@User('_id') currentUserId: string, @Param('_id') userId: string) {
+    return this.userService.followUser(currentUserId, userId);
+  }
 }

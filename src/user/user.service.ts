@@ -185,4 +185,31 @@ export class UserService {
     await this.userRepository.delete({ _id });
     return { destroyed: true };
   }
+
+  async followUser(currentUserId: string, userId: string) {
+    const currentUser = await this.userRepository.findOne({
+      where: { _id: currentUserId },
+    });
+
+    if (currentUser) {
+      const followUser = await this.userRepository.findOne({
+        where: { _id: userId },
+      });
+
+      currentUser.followings.push(followUser);
+      followUser.followers.push(currentUser);
+
+      await this.userRepository.save([currentUser, followUser]);
+
+      return currentUser.returnResponseObject(false);
+    }
+
+    throw new HttpException(
+      {
+        status: HttpStatus.NOT_FOUND,
+        error: 'This is a custom message',
+      },
+      HttpStatus.NOT_FOUND,
+    );
+  }
 }

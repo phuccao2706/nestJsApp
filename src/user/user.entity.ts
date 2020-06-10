@@ -65,6 +65,18 @@ export class UserEntity {
   @JoinTable()
   bookmarks: IdeaEntity[];
 
+  @ManyToMany(type => UserEntity, {
+    cascade: true,
+  })
+  @JoinTable()
+  followers: UserEntity[];
+
+  @ManyToMany(type => UserEntity, {
+    cascade: true,
+  })
+  @JoinTable()
+  followings: UserEntity[];
+
   @BeforeInsert()
   async hasPassword() {
     this.password = await bcrypt.hash(this.password, 9);
