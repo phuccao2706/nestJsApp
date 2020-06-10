@@ -36,13 +36,28 @@ export class UserController {
     return this.userService.getUser(username);
   }
 
+  @Get('api/user/:username/ideas')
+  getUserIdeas(@Param('username') username: string) {
+    return this.userService.getUserIdeas(username);
+  }
+
+  @Get('api/user/:username/bookmarks')
+  @UseGuards(new AuthGuard())
+  getUserBookmarks(
+    @Param('username') username: string,
+    @User('_id') userId: string,
+  ) {
+    return this.userService.getUserBookmarks(username, userId);
+  }
+
   @Put('api/user/:username/avatar')
   @UseGuards(new AuthGuard())
   setUserAvatar(
     @User('username') currentUsername: string,
     @Param('username') username: string,
-    @Body() imageUrl: string,
+    @Body() imageUrl: any,
   ) {
+    console.log(imageUrl);
     return this.userService.setUserAvatar(username, currentUsername, imageUrl);
   }
 

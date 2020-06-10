@@ -19,6 +19,15 @@ export class IdeaService {
     private commentRepository: Repository<CommentEntity>,
   ) {}
 
+  private ideaRelations = [
+    'createdBy',
+    'upvotes',
+    'downvotes',
+    'comments',
+    'comments.createdBy',
+    'comments.idea',
+  ];
+
   private formatRO = (idea: IdeaEntity): IdeaRO => {
     return {
       ...idea,
@@ -54,13 +63,7 @@ export class IdeaService {
     const user = await this.userRepository.findOne({ where: { _id: userId } });
     const idea = await this.ideaRepository.findOne({
       where: { _id },
-      relations: [
-        'upvotes',
-        'downvotes',
-        'createdBy',
-        'comments',
-        'comments.createdBy',
-      ],
+      relations: [...this.ideaRelations],
     });
     if (
       idea[oppositeOfVote].filter(voter => voter._id === user._id).length > 0 ||
@@ -89,18 +92,11 @@ export class IdeaService {
   }
 
   //INFO: get all ideas
-  async getIdeas(page: number = 1): Promise<IdeaRO[]> {
+  async getIdeas(): Promise<IdeaRO[]> {
     const ideas = await this.ideaRepository.find({
-      relations: [
-        'createdBy',
-        'upvotes',
-        'downvotes',
-        'comments',
-        'comments.createdBy',
-        'comments.idea',
-      ],
-      take: 10,
-      skip: 10 * (page - 1),
+      relations: [...this.ideaRelations],
+      // take: 10,
+      // skip: 10 * (page - 1),
       order: {
         createdAt: 'DESC',
       },
@@ -134,14 +130,7 @@ export class IdeaService {
   async getIdea(_id: string): Promise<IdeaRO> {
     const idea = await this.ideaRepository.findOne({
       where: { _id },
-      relations: [
-        'createdBy',
-        'upvotes',
-        'downvotes',
-        'comments',
-        'comments.createdBy',
-        'comments.idea',
-      ],
+      relations: [...this.ideaRelations],
     });
 
     idea.comments = idea.comments
@@ -170,7 +159,7 @@ export class IdeaService {
   ): Promise<IdeaRO> {
     let idea = await this.ideaRepository.findOne({
       where: { _id },
-      relations: ['createdBy'],
+      relations: [...this.ideaRelations],
     });
 
     this.isLegitOwner(idea.createdBy._id, userId);
@@ -186,9 +175,10 @@ export class IdeaService {
     }
 
     await this.ideaRepository.update({ _id }, data);
+
     idea = await this.ideaRepository.findOne({
       where: { _id },
-      relations: ['createdBy'],
+      relations: [...this.ideaRelations],
     });
 
     return this.formatRO(idea);

@@ -30,8 +30,8 @@ export class IdeaController {
   }
 
   @Get()
-  getIdeas(@Query('page') page: number) {
-    return this.ideaService.getIdeas(page);
+  getIdeas() {
+    return this.ideaService.getIdeas();
   }
 
   @Get('/amount')

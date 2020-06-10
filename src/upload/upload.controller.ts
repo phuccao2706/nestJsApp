@@ -3,12 +3,33 @@ import {
   Post,
   UseInterceptors,
   UploadedFile,
+  Get,
+  Param,
+  Body,
+  Delete,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import * as fs from 'fs';
+
 @Controller('api')
 export class UploadController {
+  deleteFiles(idFiles, callback) {
+    if (idFiles.length == 0) callback();
+    else {
+      console.log(idFiles);
+      let idFile = idFiles.pop();
+      fs.unlink(`./${idFile}`, function(err) {
+        if (err) callback(err);
+        else {
+          console.log(idFile + ' deleted.');
+          this.deleteFiles(idFiles, callback);
+        }
+      });
+    }
+  }
+
   @Post('uploadImg')
   @UseInterceptors(
     FileInterceptor('rawImage', {
@@ -35,5 +56,19 @@ export class UploadController {
   )
   uploadFile(@UploadedFile() { path }) {
     return path;
+  }
+
+  @Delete('removeImg')
+  async removeImage(@Body() { idFiles }: any) {
+    try {
+      // // console.log(idFiles.idFiles);
+      // return this.deleteFiles(
+      //   idFiles.map(item => 'uploads/' + item),
+      //   err => console.log(err),
+      // );
+      fs.unlinkSync(`uploads/${idFiles[0]}.png`);
+    } catch (err) {
+      throw err;
+    }
   }
 }

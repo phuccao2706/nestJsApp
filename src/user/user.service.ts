@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './user.entity';
 import { Repository } from 'typeorm';
 import { UserDTO, UserRO, UserInputDTO } from './user.dto';
+import { IdeaRO } from 'src/idea/idea.dto';
+import { formatIdeaRO } from '../shared/funcs';
 
 @Injectable()
 export class UserService {
@@ -59,10 +61,51 @@ export class UserService {
     return this.sortIdeas(user.returnResponseObject(false));
   }
 
+  async getUserIdeas(username: string): Promise<IdeaRO[]> {
+    const user = await this.userRepository.findOne({
+      where: { username },
+      relations: [
+        'ideas',
+        'bookmarks',
+        'ideas.upvotes',
+        'ideas.downvotes',
+        'ideas.comments',
+        'ideas.createdBy',
+        'ideas.comments.createdBy',
+      ],
+    });
+    let returnData = this.sortIdeas(user.returnResponseObject(false)).ideas;
+
+    return returnData.map(item => formatIdeaRO(item));
+  }
+
+  async getUserBookmarks(username: string, userId: string): Promise<IdeaRO[]> {
+    const user = await this.userRepository.findOne({
+      where: { username },
+      relations: [
+        'ideas',
+        'bookmarks',
+        'bookmarks.upvotes',
+        'bookmarks.downvotes',
+        'bookmarks.comments',
+        'bookmarks.createdBy',
+        'bookmarks.comments.createdBy',
+      ],
+    });
+
+    if (user._id !== userId) {
+      throw new HttpException('Unauthorized action.', HttpStatus.UNAUTHORIZED);
+    }
+
+    let returnData = this.sortIdeas(user.returnResponseObject(false)).bookmarks;
+
+    return returnData.map(item => formatIdeaRO(item));
+  }
+
   async setUserAvatar(
     username: string,
     currentUsername: string,
-    imageUrl: string,
+    { imageUrl }: any,
   ): Promise<UserRO> {
     const user = await this.userRepository.findOne({
       where: { username },
